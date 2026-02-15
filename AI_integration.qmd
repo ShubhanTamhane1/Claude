@@ -1,0 +1,23 @@
+---
+title: "AI Integration with the Claude API"
+author: "Shubhan Tamhane "
+format: revealjs
+theme: solarized
+execute: 
+  echo: false
+
+---
+
+## Introduction
+ - **Overview of AI in Data Science**
+  - AI is increasingly being used in data science for automating repetitive tasks, analyzing large datasets, and extracting meaningful insights
+  - AI models like **Claude** are spearheading the new wave to improve accuracy
+    and efficiency surrounding data science tasks 
+ - Claude API Overview
+  - Claude is a LLM developed by Anthropic 
+  - It is capable of natural language understanding and can be integrated with a
+    variety of a data science workflows 
+
+---
+
+
