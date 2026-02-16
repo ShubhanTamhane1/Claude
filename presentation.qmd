@@ -160,11 +160,11 @@ other one works inside 🍕
 
 ::::
 
----
 ## Multi Turn Conversations
 Pass the full message history to maintain context.
 ```{python}
 #| eval: false
+#| echo" true
 messages = [
     {"role": "user", "content": "My name is Alex."},
     {"role": "assistant", "content": "Nice to meet you, Alex!"},
@@ -179,12 +179,13 @@ response = client.messages.create(
 ```
 
 ---
+
 ## Choosing the Right Model
+
 | Model   | Best For               | Speed  | Cost |
 |---------|------------------------|--------|------|
 | Haiku   | Simple, fast tasks     | Fast   | $    |
 | Sonnet  | Balanced everyday use  | Medium | $$   |
 | Opus    | Complex reasoning      | Slower | $$$  |
 
----
 
