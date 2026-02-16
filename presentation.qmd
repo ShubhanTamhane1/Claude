@@ -9,15 +9,182 @@ execute:
 ---
 
 ## Introduction
- - **Overview of AI in Data Science**
-  - AI is increasingly being used in data science for automating repetitive tasks, analyzing large datasets, and extracting meaningful insights
-  - AI models like **Claude** are spearheading the new wave to improve accuracy
+ **Overview of AI in Data Science**
+- AI is increasingly being used in data science for automating repetitive tasks, analyzing large datasets, and extracting meaningful insights
+- AI models like **Claude** are spearheading the new wave to improve accuracy
     and efficiency surrounding data science tasks 
- - Claude API Overview
+- Claude API Overview
   - Claude is a LLM developed by Anthropic 
   - It is capable of natural language understanding and can be integrated with a
     variety of a data science workflows 
 
 ---
 
+## Why this matters
+> Imagine if you could add a brain to any app with just 10 lines of code
+
+- The Claude API makes AI Integration simple 
+- No ML knowledge required
+
+---
+
+## Step 1: Keeping your key safe
+- The first step to start building with Claude is to get an API key from
+  https://console.anthropic.com/
+- **Never** hardcode your API key directly in your code
+```{python}
+#| eval: false
+#| echo: true
+# ❌ DO NOT do this — exposes your key if pushed to GitHub
+client = anthropic.Anthropic(api_key="sk-ant-abc123...")
+```
+
+**Instead, store it in a `.env` file:**
+```{bash}
+# .env
+ANTHROPIC_API_KEY=sk-ant-your-key-here
+```
+
+---
+
+## Then load it in Python:
+```{python}
+#| eval: false
+#| echo: true
+# ✅ Do this instead
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+```
+
+---
+
+## How the API Works
+
+- The core idea is very simple. You send a message, and you get a response
+```{python}
+#| eval: false
+#| echo: true
+from anthropic import Anthropic
+client = Anthropic()
+
+message = client.messages.create(
+    model="claude-sonnet-4-5-20250929",
+    max_tokens=1024,
+    messages=[
+        {"role": "user", "content": "Hello Claude!"}
+    ]
+)
+
+print(message.content[0].text)
+```
+
+---
+
+## The Output
+```{python}
+#| eval: false
+#| echo: true
+Message(
+    id='msg_01XFDUDYJgAACzvnptvVoYEL',
+    content=[
+        TextBlock(
+            text='An API is a way for two applications
+                  to talk to each other...',
+            type='text'
+        )
+    ],
+    model='claude-sonnet-4-5-20250929',
+    role='assistant',
+    stop_reason='end_turn',
+    usage=Usage(input_tokens=15, output_tokens=120)
+)
+```
+
+---
+
+## System Prompts
+A system prompt allows you to give a role to Claude and shape how Claude behaves across a whole conversation
+```{python}
+#| eval: false
+#| echo: true
+message = client.messages.create(
+    model="claude-sonnet-4-5-20250929",
+    max_tokens=1024,
+    system="You are a helpful teaching assistant who explains things simply.",
+    messages=[
+        {"role": "user", "content": "What is an API?"}
+    ]
+)
+```
+
+## System Prompt does it really matter?
+:::: {.columns}
+
+::: {.column width="50%"}
+**Without a system prompt**
+
+*Prompt: "Explain APIs"*
+```
+An API (Application Programming
+Interface) is a set of rules that
+allows different software
+applications to communicate with
+each other. It defines the methods
+and data formats that applications
+can use to request and exchange
+information...
+```
+:::
+
+::: {.column width="50%"}
+**With a system prompt**
+
+*System: "You explain things to a 10 year old"*
+
+*Prompt: "Explain APIs"*
+```
+Imagine you're at a restaurant. You
+don't go into the kitchen to make
+your own food — you just tell the
+waiter what you want, and they bring
+it back. An API is like that waiter!
+It lets apps talk to each other
+without needing to know how the
+other one works inside 🍕
+```
+:::
+
+::::
+
+---
+## Multi Turn Conversations
+Pass the full message history to maintain context.
+```{python}
+#| eval: false
+messages = [
+    {"role": "user", "content": "My name is Alex."},
+    {"role": "assistant", "content": "Nice to meet you, Alex!"},
+    {"role": "user", "content": "What's my name?"}
+]
+
+response = client.messages.create(
+    model="claude-sonnet-4-5-20250929",
+    max_tokens=512,
+    messages=messages
+)
+```
+
+---
+## Choosing the Right Model
+| Model   | Best For               | Speed  | Cost |
+|---------|------------------------|--------|------|
+| Haiku   | Simple, fast tasks     | Fast   | $    |
+| Sonnet  | Balanced everyday use  | Medium | $$   |
+| Opus    | Complex reasoning      | Slower | $$$  |
+
+---
 
