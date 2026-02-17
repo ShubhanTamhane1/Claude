@@ -9,14 +9,14 @@ execute:
 ---
 
 ## Introduction
+
  **Overview of AI in Data Science**
+
 - AI is increasingly being used in data science for automating repetitive tasks, analyzing large datasets, and extracting meaningful insights
 - AI models like **Claude** are spearheading the new wave to improve accuracy
     and efficiency surrounding data science tasks 
 - Claude API Overview
   - Claude is a LLM developed by Anthropic 
-  - It is capable of natural language understanding and can be integrated with a
-    variety of a data science workflows 
 
 ---
 
@@ -84,25 +84,48 @@ print(message.content[0].text)
 
 ---
 
-## The Output
-```{python}
-#| eval: false
-#| echo: true
-Message(
-    id='msg_01XFDUDYJgAACzvnptvVoYEL',
-    content=[
-        TextBlock(
-            text='An API is a way for two applications
-                  to talk to each other...',
-            type='text'
-        )
-    ],
-    model='claude-sonnet-4-5-20250929',
-    role='assistant',
-    stop_reason='end_turn',
-    usage=Usage(input_tokens=15, output_tokens=120)
-)
-```
+## The Input 
+
+::: {style="font-size: 0.7em"}
+| Parameter | Required | What it does |
+|-----------|----------|--------------|
+| `model` | ✅ | Which Claude to use — Haiku, Sonnet, or Opus |
+| `max_tokens` | ✅ | Max length of the response — API won't go beyond this |
+| `system` | ❌ | Sets Claude's personality/behavior for the whole conversation |
+| `messages` | ✅ | The conversation — must always include at least one `user` message |
+|`temperature` |  ❌ | Creativity of response|
+:::
+
+---
+
+## Choosing the Right Model
+
+::: {style="font-size: 1.4em; margin-top: 1em"}
+| Model   | Best For               | Speed  | Cost |
+|---------|------------------------|--------|------|
+| Haiku   | Simple, fast tasks     | Fast   | \$    |
+| Sonnet  | Balanced everyday use  | Medium | \$\$   |
+| Opus    | Complex reasoning      | Slower | \$\$\$ |
+:::
+
+---
+
+## What Are Tokens?
+
+- Tokens are the basic units the API reads and writes — not words, not characters, but chunks of text
+- As a rough rule: **1 token ≈ 4 characters** 
+
+::: {style="font-size: 0.85em; margin-top: 0.5em"}
+| Text | Tokens |
+|------|--------|
+| `"Hello"` | 1 token |
+| `"Hello, how are you?"` | 5 tokens |
+:::
+
+- `max_tokens` controls how long Claude's response can be
+- You are billed for input tokens (what you send) + output tokens (what Claude returns)
+
+
 
 ---
 
@@ -160,11 +183,97 @@ other one works inside 🍕
 
 ::::
 
+
+---
+
+## Temperature 
+
+- Temperature controls how **creative vs predictable** Claude's responses are
+- Ranges from `0.0` to `1.0`
+
+::: {style="font-size: 0.85em; margin-top: 0.5em"}
+| Temperature | Behavior | Best For |
+|-------------|----------|----------|
+| `0.0` | Predictable, focused | Data extraction, Q&A |
+| `0.5` | Balanced | General use |
+| `1.0` | Creative, varied | Brainstorming, writing |
+:::
+```{python}
+#| eval: false
+#| echo: true
+message = client.messages.create(
+    model="claude-sonnet-4-5-20250929",
+    max_tokens=1024,
+    temperature=0.9,   # ← add this
+    messages=[
+        {"role": "user", "content": "Write me a tagline for a coffee shop"}
+    ]
+)
+```
+
+----
+
+## Does Temperature Actually Matter?
+
+:::: {.columns}
+
+::: {.column width="50%"}
+**temperature=0.0**
+
+*Prompt: "Write a tagline for a coffee shop"*
+```
+Quality coffee, served fresh daily.
+```
+*Same answer every single time.*
+:::
+
+::: {.column width="50%"}
+**temperature=1.0**
+
+*Prompt: "Write a tagline for a coffee shop"*
+```
+Where every sip tells a story ☕
+
+Fuel your chaos, one cup at a time.
+
+Life's too short for bad coffee
+and boring mornings.
+```
+*Different answer every time.*
+:::
+
+::::
+
+---
+
+
+## The Output
+```{python}
+#| eval: false
+#| echo: true
+Message(
+    id='msg_01XFDUDYJgAACzvnptvVoYEL',
+    content=[
+        TextBlock(
+            text='An API is a way for two applications
+                  to talk to each other...',
+            type='text'
+        )
+    ],
+    model='claude-sonnet-4-5-20250929',
+    role='assistant',
+    stop_reason='end_turn',
+    usage=Usage(input_tokens=15, output_tokens=120)
+)
+```
+
+---
+
 ## Multi Turn Conversations
 Pass the full message history to maintain context.
 ```{python}
 #| eval: false
-#| echo" true
+#| echo: true
 messages = [
     {"role": "user", "content": "My name is Alex."},
     {"role": "assistant", "content": "Nice to meet you, Alex!"},
@@ -180,12 +289,41 @@ response = client.messages.create(
 
 ---
 
-## Choosing the Right Model
+## Retrieval-Augmented Generation (RAG)
 
-| Model   | Best For               | Speed  | Cost |
-|---------|------------------------|--------|------|
-| Haiku   | Simple, fast tasks     | Fast   | $    |
-| Sonnet  | Balanced everyday use  | Medium | $$   |
-| Opus    | Complex reasoning      | Slower | $$$  |
+**The Problem:** Claude only knows what's in its training data, it doesn't know about your company docs, your research papers, or your database.
+
+**The Solution:** RAG = giving Claude access to your own data at query time
+
+::: {style="font-size: 0.85em"}
+
+1. Store your data in a searchable format (vector database, search index, etc.)
+2. Retrieve relevant chunks based on the user's question
+3. Send those chunks to Claude along with the user's query
+
+**Example use case:**
+- Chatbot that answers questions about your company's internal docs
+:::
+
+---
+
+## Real World Applications 
+
+::: {style="font-size: 0.85em"}
+**Document Processing**
+
+- Summarize research papers, extract key findings
+- Parse resumes and extract structured data
+
+**Data Analysis**
+
+- Natural language to SQL queries
+- Create data visualizations from descriptions
+
+**Content Creation**
+
+- Generate blog posts or social media content
+- Create product descriptions from specs
+:::
 
 
