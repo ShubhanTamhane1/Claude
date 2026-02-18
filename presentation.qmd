@@ -289,6 +289,96 @@ response = client.messages.create(
 
 ---
 
+## Demo: Building a Sentiment Analyzer
+
+**What we're building:** A tool that analyzes the sentiment of text (positive, negative, neutral)
+
+::: {style="font-size: 0.75em"}
+```{python}
+#| eval: false
+#| echo: true
+from anthropic import Anthropic
+import os
+
+client = Anthropic()
+
+def analyze_sentiment(text):
+    message = client.messages.create(
+        model="claude-sonnet-4-5-20250929",
+        max_tokens=100,
+        temperature=0,  # We want consistent results
+        system="You are a sentiment analyzer. Respond with only: positive, negative, or neutral.",
+        messages=[
+            {"role": "user", "content": f"Analyze the sentiment: {text}"}
+        ]
+    )
+    return message.content[0].text
+
+# Test it
+review = "This product completely changed my life! Best purchase ever."
+print(analyze_sentiment(review))
+```
+:::
+
+---
+
+## Running the Demo
+
+**Input:**
+```
+"This product completely changed my life! Best purchase ever."
+```
+
+**Output:**
+```
+positive
+```
+
+**Why this works:**
+
+- System prompt constrains the output to just 3 options
+- `temperature=0` ensures consistent classification
+- `max_tokens=100` keeps it fast and cheap
+
+
+---
+
+## Making It Better: Structured Output
+
+::: {style="font-size: 0.7em"}
+```{python}
+#| eval: false
+#| echo: true
+system_prompt = """You are a sentiment analyzer. 
+Return your response as JSON with this format:
+{"sentiment": "positive/negative/neutral", "confidence": 0-100, "reason": "brief explanation"}"""
+
+message = client.messages.create(
+    model="claude-sonnet-4-5-20250929",
+    max_tokens=200,
+    temperature=0,
+    system=system_prompt,
+    messages=[
+        {"role": "user", "content": f"Analyze: {review}"}
+    ]
+)
+
+import json
+result = json.loads(message.content[0].text)
+print(f"Sentiment: {result['sentiment']} ({result['confidence']}% confident)")
+print(f"Reason: {result['reason']}")
+```
+
+**Output:**
+```
+Sentiment: positive (95% confident)
+Reason: Enthusiastic language and strong positive words like "changed my life" and "best purchase ever"
+```
+:::
+
+---
+
+
 ## Retrieval-Augmented Generation (RAG)
 
 **The Problem:** Claude only knows what's in its training data, it doesn't know about your company docs, your research papers, or your database.
@@ -307,23 +397,24 @@ response = client.messages.create(
 
 ---
 
-## Real World Applications 
+## Resources & Next Steps
 
-::: {style="font-size: 0.85em"}
-**Document Processing**
+::: {style="font-size: 0.9em"}
+**Official Documentation**
 
-- Summarize research papers, extract key findings
-- Parse resumes and extract structured data
+- [Anthropic API Docs](https://docs.anthropic.com) — Full API reference
+- [Prompt Engineering Guide](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview) — Best practices for writing prompts
+- [Claude Console](https://console.anthropic.com) — Get your API key and manage usage
 
-**Data Analysis**
+**Learning Resources**
 
-- Natural language to SQL queries
-- Create data visualizations from descriptions
+- [Anthropic Cookbook](https://github.com/anthropics/anthropic-cookbook) — Code examples and tutorials
+- [API Reference](https://docs.anthropic.com/en/api) — Detailed endpoint documentation
 
-**Content Creation**
 
-- Generate blog posts or social media content
-- Create product descriptions from specs
 :::
+
+
+
 
 
