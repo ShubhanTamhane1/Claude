@@ -23,6 +23,8 @@ message = client.messages.create(
 message.content[0].text
 ```
 
+
+Basic helper functions
 ```{python}
 # Helper functions
 def add_user_message(messages, text):
@@ -42,6 +44,7 @@ def chat(messages, system=None, temperature=1.0, stop_sequences=[]):
         "messages": messages,
         "temperature": temperature,
         "stop_sequences": stop_sequences,
+
     }
 
     if system:
@@ -49,4 +52,101 @@ def chat(messages, system=None, temperature=1.0, stop_sequences=[]):
 
     message = client.messages.create(**params)
     return message.content[0].text
+```
+
+Code to start a multi turn conversation. Basically just using the helper functions and the empty list, messages
+```{python}
+messages = []
+
+while True:
+    user_input = input("> ")
+    print("> ", user_input)
+
+    add_user_message(messages, user_input)
+    answer = chat(messages, system=system)
+    add_assistant_message(messages, answer)
+    print("---")
+    print(answer)
+```
+
+
+Code to add System prompt. 
+Note the system parameter was added to the chat function above. 
+```{python}
+messages = []
+
+system = """
+    You are a patient math tutor. Do not directly answer a student's questions. Guide them to a solution step by step.
+    """
+
+add_user_message(messages, "Solve 5x+3 = 8")
+answer = chat(messages, system)
+answer
+```
+
+Code to change the temperature. 
+Higher temperature --> Higher creativity
+Lower temperature --> Lower creativity 
+
+Play around with the temperature parameter below. 
+```{python}
+messages = []
+
+add_user_message(
+    messages, 
+    "Generate a one sentence movie idea"
+)
+
+answer = chat(messages, temperature=1.0)
+answer
+```
+
+
+Code for streaming below. 
+Streaming allows text from API to come back in chunks instead of waiting for a response at once to ensure a better user experience. 
+```{python}
+messages = []
+
+add_user_message(messages, "Give a 1 sentence description of a fake database")
+
+stream = client.messages.create(
+    model=model,
+    max_tokens=1000,
+    messages=messages,
+    stream=True
+)
+
+for event in stream:
+    print(event)
+```
+
+```{python}
+message = []
+
+add_user_message(messages, "Give a 1 sentence description of a fake database")
+
+with client.messages.stream(
+    model=model,
+    max_tokens=1000,
+    messages=messages
+) as stream:
+    for text in stream.text_stream:
+        print(text, end="")
+```
+
+
+Stop sequence ends a chat output after a particular input.
+In this example, we want to remove any uneccasrey heads/footer from the json output. 
+Helpful for when we wanted a very stuctured output with nothing else outside of that. 
+```{python}
+messages = []
+
+add_user_message(messages, "Generate a very short event bridge rules as json")
+add_assistant_message(messages, "```json")
+
+
+text = chat(messages, stop_sequences=["```"])
+
+import json 
+json.loads(text.strip())
 ```
