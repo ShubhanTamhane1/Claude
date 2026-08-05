@@ -1378,8 +1378,8 @@ response = client.messages.create(
 
 )
 messages.append({
-    "role": "assistant", 
-    "content": response.content
+    "role": "assistant",
+    "content": [block.model_dump() for block in response.content]
 })
 
 messages
